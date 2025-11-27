@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflex Master - Jeu de Réflexe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #4cc9f0;
+            --accent: #f72585;
+            --success: #4ade80;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --primary: #4895ef;
+            --primary-dark: #560bad;
+            --secondary: #4cc9f0;
+            --accent: #f72585;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text: #f3f4f6;
+            --text-light: #9ca3af;
+            --bg: #111827;
+            --card: #1f2937;
+            --border: #374151;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            transition: var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theme-toggle {
+            background: var(--card);
+            border: 1px solid var(--border);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(30deg);
+            background: var(--primary);
+            color: white;
+        }
+
+        .game-container {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: var(--bg);
+            border-radius: var(--radius);
+            border: 2px dashed var(--border);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .target {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.2s ease, opacity 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .target:hover {
+            transform: scale(1.1);
+        }
+
+        .target.hit {
+            animation: hitAnimation 0.5s forwards;
+        }
+
+        @keyframes hitAnimation {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .target.missed {
+            animation: missAnimation 0.5s forwards;
+        }
+
+        @keyframes missAnimation {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            justify-content: center;
+            min-width: 140px;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button.secondary {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        button.secondary:hover {
+            background: var(--bg);
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .difficulty-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .game-message {
+            text-align: center;
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .game-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .game-message.success {
+            background: rgba(74, 222, 128, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .game-message.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .instructions {
+            background: var(--bg);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-top: 2rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .instructions h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .instructions ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .instructions li {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .instructions li i {
+            color: var(--primary);
+            margin-top: 0.2rem;
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                min-width: auto;
+            }
+            
+            .game-area {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-bolt"></i> Reflex Master</h1>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+
+        <div class="game-container">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="score">0</div>
+                    <div class="stat-label">Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="timeLeft">60</div>
+                    <div class="stat-label">Temps</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="targetsHit">0</div>
+                    <div class="stat-label">Cibles touchées</div>
+                </div>
+            </div>
+
+            <div class="difficulty-selector">
+                <div class="difficulty-btn active" data-difficulty="easy">Facile</div>
+                <div class="difficulty-btn" data-difficulty="medium">Moyen</div>
+                <div class="difficulty-btn" data-difficulty="hard">Difficile</div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+
+            <div class="game-message" id="gameMessage"></div>
+
+            <div class="controls">
+                <button id="startBtn">
+                    <i class="fas fa-play"></i> Commencer
+                </button>
+                <button id="pauseBtn" disabled>
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+                <button id="resetBtn" class="secondary">
+                    <i class="fas fa-redo"></i> Réinitialiser
+                </button>
+            </div>
+
+            <div class="game-area" id="gameArea">
+                <!-- Les cibles apparaîtront ici -->
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Comment jouer</h3>
+            <ul>
+                <li><i class="fas fa-mouse-pointer"></i> Cliquez sur les cibles colorées avant qu'elles ne disparaissent</li>
+                <li><i class="fas fa-bolt"></i> Plus vous cliquez rapidement, plus vous gagnez de points</li>
+                <li><i class="fas fa-clock"></i> Le jeu dure 60 secondes - soyez rapide !</li>
+                <li><i class="fas fa-trophy"></i> Les cibles plus petites rapportent plus de points</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>Développé avec <i class="fas fa-heart" style="color: var(--accent);"></i> - Un jeu de réflexe en JavaScript pur</p>
+        </footer>
+    </div>
+
+    <!-- <script>
+        // Éléments DOM
+        const themeToggle = document.getElementById('themeToggle');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const gameArea = document.getElementById('gameArea');
+        const scoreEl = document.getElementById('score');
+        const timeLeftEl = document.getElementById('timeLeft');
+        const targetsHitEl = document.getElementById('targetsHit');
+        const progressBar = document.getElementById('progressBar');
+        const gameMessage = document.getElementById('gameMessage');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+
+        // État du jeu
+        let gameState = {
+            score: 0,
+            timeLeft: 60,
+            targetsHit: 0,
+            isPlaying: false,
+            isPaused: false,
+            gameTimer: null,
+            targetTimer: null,
+            difficulty: 'easy'
+        };
+
+        // Paramètres de difficulté
+        const difficultySettings = {
+            easy: {
+                targetSize: 70,
+                targetLifetime: 2000,
+                spawnInterval: 1000,
+                points: 10
+            },
+            medium: {
+                targetSize: 50,
+                targetLifetime: 1500,
+                spawnInterval: 800,
+                points: 15
+            },
+            hard: {
+                targetSize: 35,
+                targetLifetime: 1000,
+                spawnInterval: 600,
+                points: 20
+            }
+        };
+
+        // Initialisation
+        function init() {
+            // Charger le thème sauvegardé
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            updateDisplay();
+        }
+
+        // Mettre à jour l'affichage
+        function updateDisplay() {
+            scoreEl.textContent = gameState.score;
+            timeLeftEl.textContent = gameState.timeLeft;
+            targetsHitEl.textContent = gameState.targetsHit;
+            progressBar.style.width = `${(gameState.timeLeft / 60) * 100}%`;
+        }
+
+        // Démarrer le jeu
+        function startGame() {
+            if (gameState.isPlaying) return;
+            
+            gameState.isPlaying = true;
+            gameState.isPaused = false;
+            gameState.score = 0;
+            gameState.timeLeft = 60;
+            gameState.targetsHit = 0;
+            
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            
+            updateDisplay();
+            showMessage('Le jeu commence !', 'success');
+            
+            // Démarrer le timer du jeu
+            gameState.gameTimer = setInterval(() => {
+                if (!gameState.isPaused) {
+                    gameState.timeLeft--;
+                    updateDisplay();
+                    
+                    if (gameState.timeLeft <= 0) {
+                        endGame();
+                    }
+                }
+            }, 1000);
+            
+            // Démarrer la génération de cibles
+            spawnTarget();
+        }
+
+        // Mettre le jeu en pause
+        function togglePause() {
+            gameState.isPaused = !gameState.isPaused;
+            
+            if (gameState.isPaused) {
+                pauseBtn.innerHTML = '<i class="fas fa-play"></i> Reprendre';
+                showMessage('Jeu en pause', 'error');
+            } else {
+                pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                showMessage('Jeu repris', 'success');
+            }
+        }
+
+        // Réinitialiser le jeu
+        function resetGame() {
+            clearInterval(gameState.gameTimer);
+            clearTimeout(gameState.targetTimer);
+            
+            gameState.isPlaying = false;
+            gameState.isPaused = false;
+            gameState.score = 0;
+            gameState.timeLeft = 60;
+            gameState.targetsHit = 0;
+            
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+            
+            // Supprimer toutes les cibles
+            const targets = document.querySelectorAll('.target');
+            targets.forEach(target => target.remove());
+            
+            updateDisplay();
+            hideMessage();
+        }
+
+        // Terminer le jeu
+        function endGame() {
+            clearInterval(gameState.gameTimer);
+            clearTimeout(gameState.targetTimer);
+            
+            gameState.isPlaying = false;
+            gameState.isPaused = false;
+            
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            
+            // Supprimer toutes les cibles
+            const targets = document.querySelectorAll('.target');
+            targets.forEach(target => target.remove());
+            
+            showMessage(`Partie terminée ! Votre score : ${gameState.score}`, 'success');
+        }
+
+        // Générer une cible
+        function spawnTarget() {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            
+            const settings = difficultySettings[gameState.difficulty];
+            const targetSize = settings.targetSize;
+            
+            // Position aléatoire dans la zone de jeu
+            const maxX = gameArea.offsetWidth - targetSize;
+            const maxY = gameArea.offsetHeight - targetSize;
+            
+            const x = Math.floor(Math.random() * maxX);
+            const y = Math.floor(Math.random() * maxY);
+            
+            // Couleur aléatoire
+            const colors = [
+                'linear-gradient(135deg, #4361ee, #3a0ca3)',
+                'linear-gradient(135deg, #f72585, #b5179e)',
+                'linear-gradient(135deg, #4cc9f0, #4895ef)',
+                'linear-gradient(135deg, #4ade80, #16a34a)',
+                'linear-gradient(135deg, #f59e0b, #d97706)'
+            ];
+            
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Créer l'élément cible
+            const target = document.createElement('div');
+            target.className = 'target';
+            target.style.width = `${targetSize}px`;
+            target.style.height = `${targetSize}px`;
+            target.style.left = `${x}px`;
+            target.style.top = `${y}px`;
+            target.style.background = color;
+            
+            // Ajouter un effet de brillance
+            target.style.backgroundImage = `${color}, radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4) 0%, transparent 60%)`;
+            
+            // Ajouter un symbole
+            const symbols = ['⚡', '🎯', '⭐', '🔴', '🟢', '🔵', '🟡'];
+            const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+            target.innerHTML = symbol;
+            
+            // Événement de clic
+            target.addEventListener('click', () => {
+                if (!gameState.isPlaying || gameState.isPaused) return;
+                
+                target.classList.add('hit');
+                gameState.score += settings.points;
+                gameState.targetsHit++;
+                
+                // Effet sonore simulé (en vrai on utiliserait Audio API)
+                createClickEffect(x + targetSize/2, y + targetSize/2);
+                
+                updateDisplay();
+                
+                setTimeout(() => {
+                    target.remove();
+                }, 500);
+            });
+            
+            // Ajouter à la zone de jeu
+            gameArea.appendChild(target);
+            
+            // Supprimer automatiquement après un certain temps
+            setTimeout(() => {
+                if (target.parentNode) {
+                    target.classList.add('missed');
+                    setTimeout(() => {
+                        if (target.parentNode) {
+                            target.remove();
+                        }
+                    }, 500);
+                }
+            }, settings.targetLifetime);
+            
+            // Planifier la prochaine cible
+            if (gameState.isPlaying && !gameState.isPaused) {
+                gameState.targetTimer = setTimeout(spawnTarget, settings.spawnInterval);
+            }
+        }
+
+        // Créer un effet visuel lors du clic
+        function createClickEffect(x, y) {
+            const effect = document.createElement('div');
+            effect.style.position = 'absolute';
+            effect.style.left = `${x}px`;
+            effect.style.top = `${y}px`;
+            effect.style.width = '0px';
+            effect.style.height = '0px';
+            effect.style.borderRadius = '50%';
+            effect.style.background = 'rgba(255, 255, 255, 0.7)';
+            effect.style.pointerEvents = 'none';
+            effect.style.transform = 'translate(-50%, -50%)';
+            effect.style.zIndex = '10';
+            
+            gameArea.appendChild(effect);
+            
+            // Animation
+            const animation = effect.animate([
+                { width: '0px', height: '0px', opacity: 1 },
+                { width: '50px', height: '50px', opacity: 0 }
+            ], {
+                duration: 500,
+                easing: 'ease-out'
+            });
+            
+            animation.onfinish = () => {
+                effect.remove();
+            };
+        }
+
+        // Afficher un message
+        function showMessage(text, type) {
+            gameMessage.textContent = text;
+            gameMessage.className = `game-message ${type} show`;
+            
+            setTimeout(() => {
+                hideMessage();
+            }, 3000);
+        }
+
+        // Masquer le message
+        function hideMessage() {
+            gameMessage.classList.remove('show');
+        }
+
+        // Changer la difficulté
+        function changeDifficulty(difficulty) {
+            gameState.difficulty = difficulty;
+            
+            difficultyBtns.forEach(btn => {
+                if (btn.dataset.difficulty === difficulty) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            if (gameState.isPlaying) {
+                showMessage(`Difficulté changée : ${difficulty}`, 'success');
+            }
+        }
+
+        // Basculer le thème
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Événements
+        startBtn.addEventListener('click', startGame);
+        pauseBtn.addEventListener('click', togglePause);
+        resetBtn.addEventListener('click', resetGame);
+        themeToggle.addEventListener('click', toggleTheme);
+
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                changeDifficulty(btn.dataset.difficulty);
+            });
+        });
+
+        // Initialiser le jeu
+        init();
+    </script> -->
+</body>
+</html>
